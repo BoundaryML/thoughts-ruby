@@ -37,9 +37,32 @@ generator ts_target {
 }
 ```
 
+# Included documents
+
+`bridge-ref/` contains reference documents about the currently implemented behavior of the Python and TS SDKs.
+
+`bridge-node/` contains the documents I handwrote / wrote-in-tandem-with-Claude to guide the implementation, and then implemented using `/goal` prompts:
+- `00*` docs were handwritten
+- `01` through `06` were implementation plans that Claude generated and which I then proofread and revised until there were no remaining open questions
+- `10` through `12` were documents that I used to track followup work (this is not the complete list of followup items)
+
+I would suggest using every document in `bridge-ref/` and `bridge-node/00b-overview.md` as your starting points.
+
+# Recommendations
+
+I would strongly recommend manually writing Ruby versions of the ref documents
+- I used these as my baseline goal documents, i.e. these were the documents I used to steer the generation of the implementation plan docs
+- Once the goal documents are high-quality, generating the implementation plan isn't too hard
+
+I would also suggest making your coding agent implement a swath of things, seeing what _doesn't_ work and learning from it, then throwing away what it did and re-doing the plans and simply re-implementing from scratch. It's really easy to get trapped in a local suboptima if you try to rescue a poorly done implementation.
+
+I've also gotten a _lot_ of mileage out of asking Claude to "read this document and tell me if there are any inconsistencies in it" - this comes in really helpful for identifying everything from mismatched parentheses to "here's a contradiction in your definition of this critical runtime abstraction".
+
 # SDK structure
 
-Implementing a new host-language SDK today follows (roughly) this process:
+This is a simplified version of the phase-by-phase implementation strategy I used to implement the Python and Node.js SDKs (the full overview document that I gave to Claude is in 00b-overview.md), but written to explain to _you_, Ryan, (1) what changes you need to make to each phase and (2) what design decisions you'll need to make.
+
+(This breakdown is also written to give you a sense of why I broke down the phases in the way that I did.)
 
 1. set up test coverage in `sdk_tests/` paralleling the existing test coverage
 	- `sdk_tests/README.md` details how to run the current tests (`cargo nextest run -p sdk_test_python_pydantic2` and `cargo nextest run -p sdk_test_typescript_node`) and add new test cases
@@ -75,22 +98,3 @@ Implementing a new host-language SDK today follows (roughly) this process:
 		- that is, given a `BamlOutboundValue` of type `T_baml`, the bridge/generated code should be able to use the generated type map to construct a corresponding instance of `T_host`; the same goes for inbound serialization
 		- the idea of `BexExternalValue` and `BamlOutboundValue` is that those types should contain enough information for instances of `BexExternalValue` and `BamlOutboundValue` to be 99% self-describing - the only thing they don't contain is the _definition_ of a type
 8. set up the release process (GitHub workflows, OIDC, etc)
-
-# Included documents
-
-`bridge-ref/` contains reference documents about the currently implemented behavior of the Python and TS SDKs.
-
-`bridge-node/` contains the documents I handwrote / wrote-in-tandem-with-Claude to guide the implementation, and then implemented using `/goal` prompts:
-- `00*` docs were handwritten
-- `01` through `06` were implementation plans that Claude generated and which I then proofread and revised until there were no remaining open questions
-- `10` through `12` were documents that I used to track followup work (this is not the complete list of followup items)
-
-I would suggest using every document in `bridge-ref/` and `bridge-node/00b-overview.md` as your starting points.
-
-# Recommendations
-
-I would strongly recommend manually writing Ruby versions of the ref documents
-- I used these as my baseline goal documents, i.e. these were the documents I used to steer the generation of the implementation plan docs
-- Once the goal documents are high-quality, generating the implementation plan isn't too hard
-
-I've also gotten a _lot_ of mileage out of asking Claude to "read this document and tell me if there are any inconsistencies in it" - this comes in really helpful for identifying everything from mismatched parentheses to "here's a contradiction in your definition of this critical runtime abstraction".
